@@ -39,6 +39,11 @@ data TracerA m a b where
 -- | The resulting Kleisli arrow includes all of the effects required to do
 -- the emitting part.
 runTracerA :: Monad m => TracerA m a () -> Kleisli m a ()
+-- COMMENT: (@russoul) Why build up _noEmits to only drop it later?
+-- `runTracerA` is the only intended way to eliminate `TracerA`, meaning
+-- _noEmits is redundant data! Moreover, it's a memory leak in a common use-case scenario
+-- where a tracer is created once and is retained and used over the whole lifetime of
+-- the application (via runTracerA calls sprinkled around the application code)
 runTracerA (Emitting emits _noEmits) = emits >>> arr (const ())
 runTracerA (Squelching     _       ) =           arr (const ())
 
